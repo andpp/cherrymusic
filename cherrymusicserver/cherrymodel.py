@@ -67,6 +67,11 @@ class CherryModel:
     def __init__(self):
         CherryModel.NATIVE_BROWSER_FORMATS = ['opus', 'ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
+        CherryModel.SPECIAL_DIRS = ('Проповеди','Школа')
+        self.re = re.compile('(\D+)(\d+)(\D*)')
+        self.re_NameYear = re.compile('(\D+)(\d\d\d\d)$')
+        self.re_NameYearMo = re.compile('(\D+)(\d\d\d\d\d\d)$')
+#        self.re_NameYear = re.compile('(\D+)((\d\d\d\d$)|(\d\d\d\d\d\d$))')
         if cherry.config['media.transcode']:
             self.transcoder = audiotranscode.AudioTranscode()
             formats = CherryModel.supportedFormats
@@ -144,6 +149,7 @@ class CherryModel:
         compactlisting = len(allfilesindir) > maximum_shown_files
         if compactlisting:
             upper_case_files = [x.upper() for x in allfilesindir]
+            oldfilterstr = filterstr
             filterstr = os.path.commonprefix(upper_case_files)
             filterlength = len(filterstr)+1
             currentletter = '/'  # impossible first character
@@ -153,23 +159,69 @@ class CherryModel:
 # _AND_
 #            print(filterlength, filterstr)
 
-            for dir in sortedfiles:
-                filter_match = dir.upper().startswith(currentletter.upper())
-                if filter_match and not len(currentletter) < filterlength:
-                    continue
+#            if dirpath in ('Проповеди','Школа'):
+            if dirpath in CherryModel.SPECIAL_DIRS :
+                filterlength = len(oldfilterstr)
+                if filterlength == 0:
+                    for dir in sortedfiles:
+                        filter_match = self.re.match(dir.upper())
+#                        filter_match = self.re.match(dir)
+                        if not (filter_match is None) :
+                            if filter_match.group(1) == currentletter:
+                                continue
+                            else:
+                                currentletter = filter_match.group(1)
+#                               print(filter_match.group(1))
+                                musicentries.append(
+                                    MusicEntry(strippath(absdirpath),
+                                           repr=currentletter,
+                                           compact=True))
                 else:
-                    currentletter = dir[:filterlength]
-                    #if the filter equals the foldername
-                    if len(currentletter) == len(filterstr):
-                        subpath = os.path.join(absdirpath, dir)
-                        CherryModel.addMusicEntry(subpath, musicentries)
-#                        print("addMusicEntry")
+                    resYear = self.re_NameYear.match(oldfilterstr)
+                    resYearMo = self.re_NameYearMo.match(oldfilterstr)
+                    if resYear is None :
+                        c = 4
+                    elif resYearMo is None:
+                        c = 2
                     else:
-                        musicentries.append(
-                            MusicEntry(strippath(absdirpath),
+                        c = 0
+#                    print(oldfilterstr, "   c = ", c, " resYear = ", resYear, "\n", resYearMo)
+                    for dir in sortedfiles:
+                        if dir[:filterlength+c].upper() == currentletter.upper() :
+#                        if dir[:filterlength+1] == currentletter :
+                             continue
+                        else:
+                            currentletter = dir[:filterlength+c]
+#                            print(currentletter)
+                            #if the filter equals the foldername
+#                            if len(currentletter) == len(filterstr):
+#                                subpath = os.path.join(absdirpath, dir)
+#                                CherryModel.addMusicEntry(subpath, musicentries)
+#                               print("addMusicEntry")
+#                            else:
+                            musicentries.append(
+                                    MusicEntry(strippath(absdirpath),
+                                           repr=currentletter,
+                                           compact=True))
+
+            else:     # if not (dirpath in CherryModel.SPECIAL_DIRS):
+                for dir in sortedfiles:
+                    filter_match = dir.upper().startswith(currentletter.upper())
+                    if filter_match and not len(currentletter) < filterlength:
+                        continue
+                    else:
+                        currentletter = dir[:filterlength]
+                        #if the filter equals the foldername
+                        if len(currentletter) == len(filterstr):
+                            subpath = os.path.join(absdirpath, dir)
+                            CherryModel.addMusicEntry(subpath, musicentries)
+#                           print("addMusicEntry")
+                        else:
+                            musicentries.append(
+                                MusicEntry(strippath(absdirpath),
                                        repr=currentletter,
                                        compact=True))
-#                        print("musicentries_append", currentletter)
+#                           print("musicentries_append", currentletter)
         else:
             # enable natural number ordering for real directories and files
             sortedfiles = self.sortFiles(allfilesindir, absdirpath,
