@@ -63,6 +63,14 @@ def from_defaults():
 
     c = ConfigBuilder()
 
+    with c['media.special_dirs'] as spec_dir:
+        spec_dir.value = ()
+        spec_dir.doc = _("""
+                    SPECIAL_DIRS specified dirs with special filename processing.
+                    File Names in the dirs MUST have this format: 
+                    'Some name YYYYMMDD some comment'
+                            """)
+
     with c['media.basedir'] as basedir:
         basedir.value = None
         basedir.valid = _validate_basedir

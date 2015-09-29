@@ -67,7 +67,8 @@ class CherryModel:
     def __init__(self):
         CherryModel.NATIVE_BROWSER_FORMATS = ['opus', 'ogg', 'mp3']
         CherryModel.supportedFormats = CherryModel.NATIVE_BROWSER_FORMATS[:]
-        CherryModel.SPECIAL_DIRS = ('Проповеди','Школа')
+#        CherryModel.SPECIAL_DIRS = ('Проповеди','Школа')
+        CherryModel.specialDirs = cherry.config['media.special_dirs'].split(',')
         self.re = re.compile('(\D+)(\d+)(\D*)')
         self.re_NameYear = re.compile('(\D+)(\d\d\d\d)$')
         self.re_NameYearMo = re.compile('(\D+)(\d\d\d\d\d\d)$')
@@ -160,7 +161,7 @@ class CherryModel:
 #            print(filterlength, filterstr)
 
 #            if dirpath in ('Проповеди','Школа'):
-            if dirpath in CherryModel.SPECIAL_DIRS :
+            if dirpath in CherryModel.specialDirs :
                 filterlength = len(oldfilterstr)
                 if filterlength == 0:
                     for dir in sortedfiles:
@@ -204,7 +205,7 @@ class CherryModel:
                                            repr=currentletter,
                                            compact=True))
 
-            else:     # if not (dirpath in CherryModel.SPECIAL_DIRS):
+            else:     # if not (dirpath in CherryModel.specialDirs):
                 for dir in sortedfiles:
                     filter_match = dir.upper().startswith(currentletter.upper())
                     if filter_match and not len(currentletter) < filterlength:
