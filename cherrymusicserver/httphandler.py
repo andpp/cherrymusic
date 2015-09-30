@@ -73,6 +73,7 @@ debug = True
 class HTTPHandler(object):
     def __init__(self, config):
         self.config = config
+        self.guest_username = cherry.config['server.guest_user']
 
         template_main = 'res/dist/main.html'
         template_login = 'res/login.html'
@@ -363,9 +364,12 @@ class HTTPHandler(object):
         uo.setOption('last_time_online', int(time.time()))
 
     def api_setuseroption(self, optionkey, optionval):
-        uo = self.useroptions.forUser(self.getUserId())
-        uo.setOption(optionkey, optionval)
-        return "success"
+        if cherrypy.session['username'] == self.guest_username:
+            return "error: not permitted. %s can't change user options" % self.guest_username
+        else:
+            uo = self.useroptions.forUser(self.getUserId())
+            uo.setOption(optionkey, optionval)
+            return "success"
 
     def api_setuseroptionfor(self, userid, optionkey, optionval):
         if cherrypy.session['admin']:
@@ -490,6 +494,8 @@ class HTTPHandler(object):
         cherrypy.session['playlist'] = playlist
 
     def api_saveplaylist(self, playlist, public, playlistname, overwrite=False):
+        if cherrypy.session['username'] == self.guest_username:
+            raise cherrypy.HTTPError(403,"Forbidden")
         res = self.playlistdb.savePlaylist(
             userid=self.getUserId(),
             public=1 if public else 0,
@@ -591,6 +597,8 @@ class HTTPHandler(object):
         isself = username == ''
         if isself:
             username = cherrypy.session['username']
+            if username == self.guest_username:
+                raise cherrypy.HTTPError(403,"Forbidden")
             authed_user = self.userdb.auth(username, oldpassword)
             is_authenticated = userdb.User.nobody() != authed_user
             if not is_authenticated:

@@ -71,6 +71,12 @@ def from_defaults():
                     'Some name YYYYMMDD some comment'
                             """)
 
+    with c['server.guest_user'] as guest_user:
+        guest_user.value = 'guest'
+        guest_user.doc = _("""
+                   The name of guest user with restricted privilegies
+                            """)
+
     with c['media.basedir'] as basedir:
         basedir.value = None
         basedir.valid = _validate_basedir
