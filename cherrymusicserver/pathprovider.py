@@ -43,7 +43,9 @@ sharedFolderName = 'cherrymusic'    # /usr/share/sharedFolderName
 def getUserDataPath():
     userdata = ''
     if sys.platform.startswith('linux'):  # linux
-        if 'XDG_DATA_HOME' in os.environ:
+        if 'CHERRYMUSIC_DATA_HOME' in os.environ:
+            userdata = os.path.join(os.environ['CHERRYMUSIC_DATA_HOME'],userDataFolderName)
+        elif 'XDG_DATA_HOME' in os.environ:
             userdata = os.path.join(os.environ['XDG_DATA_HOME'],userDataFolderName)
         else:
             userdata = os.path.join(os.path.expanduser('~'), '.local', 'share', userDataFolderName)
@@ -63,7 +65,9 @@ def getConfigPath():
     else:
         configpath = ''
         if sys.platform.startswith('linux'):  # linux
-            if 'XDG_CONFIG_HOME' in os.environ:
+            if 'CHERRYMUSIC_CONFIG_HOME' in os.environ:
+                configpath = os.path.join(os.environ['CHERRYMUSIC_CONFIG_HOME'], configFolderName)
+            elif 'XDG_CONFIG_HOME' in os.environ:
                 configpath = os.path.join(os.environ['XDG_CONFIG_HOME'], configFolderName)
             else:
                 configpath = os.path.join(os.path.expanduser('~'), '.config', configFolderName)

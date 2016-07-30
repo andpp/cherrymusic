@@ -164,7 +164,16 @@ def usage():
     print("usage: %s start|stop|restart" % sys.argv[0])
 
 if __name__ == "__main__":
-    daemon = CherryMusicDaemon('/tmp/cherrymusic.pid')
+#    print(cherrymusicserver.pathprovider.pidFile())
+#    print(cherrymusicserver.pathprovider.getConfigPath())
+#    print(cherrymusicserver.pathprovider.getUserDataPath())
+    pidfile = os.path.join(cherrymusicserver.pathprovider.getUserDataPath(), "cm_daemon.pid")
+#    print(pidfile)
+
+#    sys.exit(2)
+
+#    daemon = CherryMusicDaemon('/tmp/cherrymusic.pid')
+    daemon = CherryMusicDaemon(pidfile)
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             daemon.start()

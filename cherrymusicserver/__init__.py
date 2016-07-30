@@ -332,6 +332,7 @@ class CherryMusic:
     @classmethod
     def stopAndCleanUp(cls, signal=None, stackframe=None):
         """Delete the process id file and exit"""
+        print("Signal = ",signal)
         CherryMusic.delete_pid_file()
         print('Exiting...')
         sys.exit(0)

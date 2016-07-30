@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- Mode: python -*-
+# -*- Mode: python3 -*-
 #
 # $Id: mp3info.py,v 1.2 2006/01/20 03:38:58 timbl Exp $
 # 
@@ -409,7 +409,8 @@ class MPEG:
         while curr_pos <= seeklimit:            
             # look for the sync byte
 #            offset = string.find(header, chr(255), curr_pos)
-            offset = header.find(255,  curr_pos)
+#            print(type(header))
+            offset = header.find(b'\xff',  curr_pos)
 #            print(curr_pos, seekstart)
 
             if offset == -1:
