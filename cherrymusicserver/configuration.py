@@ -180,6 +180,12 @@ def from_defaults():
         ipv6.value = False
         # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
         ipv6.doc = _("""When set to true, the server will listen on a IPv6
+                          socket""")
+
+    with c['server.ipv6_only'] as ipv6_only:
+        ipv6_only.value = False
+        # i18n: Don't mind whitespace - string will be re-wrapped automatically. Use blank lines to separate paragraphs.
+        ipv6_only.doc = _("""When set to true, the server will listen on a IPv6
                           socket instead of IPv4""")
 
     with c['server.localhost_only'] as localhost_only:

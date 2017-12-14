@@ -393,12 +393,15 @@ If you are sure that cherrymusic is not running, you can delete this file and re
     def start_server(self, httphandler):
         """use the configuration to setup and start the cherrypy server
         """
-        cherrypy.config.update({'log.screen': True})
+        cherrypy.config.update({'log.screen': True, 'tools.proxy.on': True})
         ipv6_enabled = config['server.ipv6_enabled']
+        ipv6_only = config['server.ipv6_only']
         if config['server.localhost_only']:
-            socket_host = "::1" if ipv6_enabled else "127.0.0.1"
+            socket_host = "::1" if ipv6_enabled and ipv6_only else "127.0.0.1"
         else:
-            socket_host = "::" if ipv6_enabled else "0.0.0.0"
+            socket_host = "::" if ipv6_enabled and ipv6_only else "0.0.0.0"
+
+        print("socket_host " + socket_host)
 
         resourcedir = os.path.abspath(pathprovider.getResourcePath('res'))
 
@@ -477,7 +480,16 @@ If you are sure that cherrymusic is not running, you can delete this file and re
                     'tools.staticfile.filename': resourcedir + '/img/favicon.ico',
                 }})
         api.v1.mount('/api/v1')
-        log.i(_('Starting server on port %s ...') % config['server.port'])
+        log.i(_('Starting server on %s port %s ...') % (socket_host, config['server.port']))
+
+#        if ipv6_enabled and not ipv6_only:
+#            ipv6_srv = cherrypy._cpserver.Server()
+#            ipv6_srv.socket_port = config['server.port']
+#            ipv6_srv.socket_host = "::1" if config['server.localhost_only'] else "::"
+#            print("ipv6_socket " + ipv6_srv._socket_host)
+#            ipv6_srv.thread_pool = 10
+#            ipv6_srv.subscribe()
+        
 
         cherrypy.lib.caching.expires(0)  # disable expiry caching
         cherrypy.engine.start()
